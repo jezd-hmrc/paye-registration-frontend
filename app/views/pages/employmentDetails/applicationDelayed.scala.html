@@ -1,0 +1,22 @@
+@import helpers.templates.{payeInputRadioGroup, payeErrorSummary}
+@import models.view.ApplicationDelayed
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+
+@(applicationDelayedForm: Form[applicationDelayed])(implicit request: Request[_], messages: Messages)
+
+@main_template(title = Messages("pages.applicationDelayed.title")) {
+    @payeErrorSummary(
+        Messages("app.common.errorSummaryLabel"), applicationDelayedForm, dataJourney=Some("ApplicationDelayed")
+    )
+
+    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.applicationDelayed.description")</h1>
+
+    @govHelpers.form(action = controllers.userJourney.routes.NewEmploymentController.submitApplicationDelayed) {
+
+        <p>@Messages("pages.applicationDelayed.para1")</p>
+        <p>@Messages("pages.applicationDelayed.para2")</p>
+
+
+        <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+    }
+}

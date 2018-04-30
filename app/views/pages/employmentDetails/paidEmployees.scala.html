@@ -1,0 +1,48 @@
+@import helpers.templates.{hiddenDetails, inlineDateInput, payeInputRadioGroup, payeErrorSummary}
+@import models.view.PaidEmployees
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import helpers.templates.linkNewWindow
+
+@(paidEmployeesForm: Form[PaidEmployees])(implicit request: Request[_], messages: Messages)
+
+@hiddenYesNoContent = {
+ @payeInput(
+ paidEmployeesForm("paidEmployees"),
+ '_labelClass -> "form-label cascading",
+ '_label -> Messages("pages.paidEmployees.paidEmployeesLabel"),
+ '_inputHint -> messages("pages.paidEmployees.input.hint-text")
+)
+}
+
+@main_template(title = Messages("pages.paidEmployees.title")) {
+    @payeErrorSummary(
+        Messages("app.common.errorSummaryLabel"), paidEmployeesForm, dataJourney=Some("PaidEmployees")
+    )
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.paidEmployees.description")</h1>
+    @govHelpers.form(action = controllers.userJourney.routes.NewEmploymentController.submitPaidEmployees) {
+        <p>@Messages("pages.paidEmployees.paidEmployeesRulesIntro")</p>
+    <ul class="list list-bullet">
+        <li>@Messages("pages.paidEmployees.paidEmployeesRules1")</li>
+        <li>@Messages("pages.paidEmployees.paidEmployeesRules2")</li>
+        <li>@Messages("pages.paidEmployees.paidEmployeesRules3")</li>
+
+    </ul>
+
+        <div class="inline form-group">
+            @payeInputRadioGroup(
+                paidEmployeesForm("hasEmployees"),
+                Seq(
+                    "true"->Messages("app.common.yes"),
+                    "false"->Messages("app.common.no")
+                ),
+                '_legend -> Messages("pages.paidEmployees.description"),
+                '_legendID -> "paidEmployees",
+                '_helpText -> None,
+                '_labelAfter -> true,
+                '_labelClass -> "block-label",
+                '_groupClass -> "inline"
+            )
+        </div>
+        <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+    }
+}

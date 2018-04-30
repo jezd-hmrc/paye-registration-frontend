@@ -30,6 +30,7 @@ POST        /offshore-employer                                controllers.userJo
 GET         /pay-non-cash-incentive-awards                    controllers.userJourney.EligibilityController.directorEligibility
 POST        /pay-non-cash-incentive-awards                    controllers.userJourney.EligibilityController.submitDirectorEligibility
 
+
 ## COMPLETION CAPACITY
 GET         /relationship-to-company                          controllers.userJourney.CompletionCapacityController.completionCapacity
 POST        /relationship-to-company                          controllers.userJourney.CompletionCapacityController.submitCompletionCapacity
@@ -50,6 +51,18 @@ GET         /return-from-address-for-ppob                     controllers.userJo
 ## BUSINESS CONTACT DETAILS
 GET         /business-contact-details                         controllers.userJourney.CompanyDetailsController.businessContactDetails
 POST        /business-contact-details                         controllers.userJourney.CompanyDetailsController.submitBusinessContactDetails
+
+## PAID EMPLOYEES
+GET         /employ-anyone                                   controllers.userJourney.NewEmploymentController.paidEmployees
+POST        /employ-anyone                                   controllers.userJourney.NewEmploymentController.submitPaidEmployees
+
+## CONSTRUCTION INDUSTRY
+GET         /work-construction-industry                      controllers.userJourney.NewEmploymentController.constructionIndustry
+POST        /work-construction-industry                      controllers.userJourney.NewEmploymentController.submitConstructionIndustry
+
+## APPLICATION DELAYED
+GET        /application-delayed                              controllers.userJourney.NewEmploymentController.applicationDelayed
+POST       /application-delayed                              controllers.userJourney.NewEmploymentController.submitApplicationDelayed
 
 ## EMPLOYMENT
 GET         /employ-staff-next-two-months                     controllers.userJourney.EmploymentController.employingStaff
