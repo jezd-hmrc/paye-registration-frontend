@@ -17,7 +17,7 @@
 package forms.employmentDetails
 
 import java.time.LocalDate
-import forms.employmentDetails.PaidEmployeesForm.{dateTimeFormat, prefix}
+import forms.employmentDetails.PaidEmployeesForm.{dateTimeFormat, customFormPrefix}
 import helpers.PayeComponentSpec
 import models.view.EmployingAnyone
 import play.api.data.FormError
@@ -77,22 +77,22 @@ class PaidEmployeesFormSpec extends PayeComponentSpec {
       testFormIncorped2MonthsAgo.bind(notPayingAnyone).value.get mustBe EmployingAnyone(false, None)
     }
     "return an error when not passing in a date when making payments" in {
-      testFormIncorped2MonthsAgo.bind(payingSomeoneNoDate).errors mustBe Seq(FormError(s"${prefix}-fieldset", "pages.paidEmployees.date.empty"))
+      testFormIncorped2MonthsAgo.bind(payingSomeoneNoDate).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.empty"))
     }
     "return a completed form when paying someone and providing a date which is allowable" in {
       testFormIncorped2MonthsAgo.bind(payingSomeoneAllowableDate).value.get mustBe EmployingAnyone(true, Some(LocalDate.of(today.getYear, today.getMonthValue, today.getDayOfMonth)))
     }
     "return a form error when passing in a paying date before date of incorp" in {
-      testFormIncorped2MonthsAgo.bind(payingSomeone2YearsAgo).errors mustBe Seq(FormError(s"${prefix}-fieldset", "pages.paidEmployees.date.dateTooEarly", Seq(incorpDate2MonthsPrior.format(dateTimeFormat))))
+      testFormIncorped2MonthsAgo.bind(payingSomeone2YearsAgo).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.dateTooEarly", Seq(incorpDate2MonthsPrior.format(dateTimeFormat))))
     }
     "return a form error when passing in a paying date on or after incorp date, but more than 2 years in the past" in {
-      testFormIncorped3YearsAgo.bind(payingSomeone3YearsAgo).errors mustBe Seq(FormError(s"${prefix}-fieldset", "pages.paidEmployees.date.moreThanTwoYears"))
+      testFormIncorped3YearsAgo.bind(payingSomeone3YearsAgo).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.moreThanTwoYears"))
     }
     "return a form error when passing in an invalid date" in {
-      testFormIncorped3YearsAgo.bind(payingSomeoneInvalidDate).errors mustBe Seq(FormError(s"${prefix}-fieldset", "pages.paidEmployees.date.invalid"))
+      testFormIncorped3YearsAgo.bind(payingSomeoneInvalidDate).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.invalid"))
     }
     "return a form error when passing in a future date" in {
-      testFormIncorped3YearsAgo.bind(payingSomeoneInFuture).errors mustBe Seq(FormError(s"${prefix}-fieldset", "pages.paidEmployees.date.dateInFuture"))
+      testFormIncorped3YearsAgo.bind(payingSomeoneInFuture).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.dateInFuture"))
     }
   }
 
