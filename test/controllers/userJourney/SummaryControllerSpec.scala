@@ -54,6 +54,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val payeRegistrationConnector  = mockPayeRegistrationConnector
       override val submissionService          = mockSubmissionService
       implicit val messagesApi: MessagesApi   = mockMessagesApi
+      override val incorporationInformationConnector = mockIncorpInfoConnector
     }
   }
 

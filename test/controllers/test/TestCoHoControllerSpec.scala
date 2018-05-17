@@ -51,6 +51,7 @@ class TestCoHoControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val coHoAPIService          = mockIncorpInfoService
       override val messagesApi             = mockMessagesApi
       override val authConnector           = mockAuthConnector
+      override val incorporationInformationConnector = mockIncorpInfoConnector
     }
   }
 

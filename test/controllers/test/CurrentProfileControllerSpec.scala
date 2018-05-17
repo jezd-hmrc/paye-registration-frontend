@@ -42,6 +42,7 @@ class CurrentProfileControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val keystoreConnector        = mockKeystoreConnector
       override val testBusinessRegConnector = mockTestBusRegConnector
       override val authConnector            = mockAuthConnector
+      override val incorporationInformationConnector = mockIncorpInfoConnector
     }
   }
 

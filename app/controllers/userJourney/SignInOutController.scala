@@ -17,9 +17,9 @@
 package controllers.userJourney
 
 import java.io.File
-import javax.inject.Inject
 
-import connectors.KeystoreConnector
+import javax.inject.Inject
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
@@ -36,7 +36,8 @@ class SignInOutControllerImpl @Inject()(val messagesApi: MessagesApi,
                                         val s4LService: S4LService,
                                         val companyDetailsService: CompanyDetailsService,
                                         val incorpInfoService: IncorporationInformationService,
-                                        val keystoreConnector: KeystoreConnector) extends SignInOutController with AuthRedirectUrls
+                                        val keystoreConnector: KeystoreConnector,
+                                        val incorporationInformationConnector: IncorporationInformationConnector) extends SignInOutController with AuthRedirectUrls
 
 trait SignInOutController extends PayeBaseController {
 
@@ -65,6 +66,6 @@ trait SignInOutController extends PayeBaseController {
 
   def incorporationRejected: Action[AnyContent] = isAuthorised {
     implicit request =>
-      Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/rejection"))
+      Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/cant-continue"))
   }
 }

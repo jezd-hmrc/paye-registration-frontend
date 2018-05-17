@@ -60,26 +60,26 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
     }
   }
 
-  "deletePayeRegistrationDocument" should {
+  "deleteRejectedRegistration" should {
     "return a RegistrationDeletionSuccess" when {
       "the users paye document was deleted" in new Setup {
-        when(mockPAYERegConnector.deleteCurrentRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPAYERegConnector.deleteRejectedRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.success))
 
         when(mockKeystoreConnector.remove()(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(true))
 
-        val result = await(service.deletePayeRegistrationDocument("testRegId", "testTxId"))
+        val result = await(service.deleteRejectedRegistration("testRegId", "testTxId"))
         result mustBe RegistrationDeletion.success
       }
     }
 
     "return a RegistrationDeletionInvalidStatus" when {
       "the users paye document was not deleted" in new Setup {
-        when(mockPAYERegConnector.deleteCurrentRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPAYERegConnector.deleteRejectedRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.invalidStatus))
 
-        val result = await(service.deletePayeRegistrationDocument("testRegId", "testTxId"))
+        val result = await(service.deleteRejectedRegistration("testRegId", "testTxId"))
         result mustBe RegistrationDeletion.invalidStatus
       }
     }

@@ -43,8 +43,8 @@ trait PAYERegistrationService {
     payeRegistrationConnector.createNewRegistration(regId, txId)
   }
 
-  def deletePayeRegistrationDocument(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
-    payeRegistrationConnector.deleteCurrentRegistrationDocument(regId, txId) flatMap  {
+  def deleteRejectedRegistration(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+    payeRegistrationConnector.deleteRejectedRegistrationDocument(regId, txId) flatMap  {
       case RegistrationDeletion.success => keyStoreConnector.remove() map {
         _ => RegistrationDeletion.success
       }
@@ -52,19 +52,23 @@ trait PAYERegistrationService {
     }
   }
 
-  def handleIIResponse(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier): Future[Unit] = {
-    for {
-      oRegIdFromCp  <- currentProfileService.updateCurrentProfileWithIncorpStatus(txId, status)
-      regId         <- oRegIdFromCp.fold(payeRegistrationConnector.getRegistrationId(txId))(Future.successful)
-      _             <- tearDownUserData(regId, txId) if status == IncorporationStatus.rejected
-    } yield ()
+  def handleIIResponse(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+    currentProfileService.updateCurrentProfileWithIncorpStatus(txId, status).flatMap { oRegIdFromCp =>
+      if (status == IncorporationStatus.rejected) {
+        oRegIdFromCp.fold(payeRegistrationConnector.getRegistrationId(txId))(Future.successful) flatMap { regId =>
+          tearDownUserData(regId, txId)
+        }
+      }
+      else {
+        Future.successful(RegistrationDeletion.invalidStatus)
+      }
+    }
   }
 
-  private def tearDownUserData(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Boolean] = for{
+  private def tearDownUserData(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = for{
     _         <- s4LService.clear(regId)
-    response  <- deletePayeRegistrationDocument(regId, txId)
-    success   = response == RegistrationDeletion.success
-  } yield success
+    response  <- payeRegistrationConnector.deleteRegistrationForRejectedIncorp(regId, txId)
+  } yield response
 
   def deletePayeRegistrationInProgress(regId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
     getCurrentProfile flatMap { profile =>

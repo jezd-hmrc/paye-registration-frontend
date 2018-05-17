@@ -47,6 +47,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
       override val messagesApi = mockMessagesApi
       override val authConnector = mockAuthConnector
       override val keystoreConnector = mockKeystoreConnector
+      override val incorporationInformationConnector = mockIncorpInfoConnector
     }
   }
 

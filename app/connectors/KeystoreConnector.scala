@@ -92,7 +92,7 @@ trait KeystoreConnector {
 
   def fetchByTransactionId(txId: String)(implicit hc: HeaderCarrier): Future[Option[SessionMap]] = {
     metricsService.processOptionalDataWithMetrics(successCounter, emptyResponseCounter, timer) {
-      sessionRepository().getSessionMapByTransactionId(txId)
+      sessionRepository().getLatestSessionMapByTransactionId(txId)
     }
   }
 

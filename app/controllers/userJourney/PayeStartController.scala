@@ -43,7 +43,8 @@ class PayeStartControllerImpl @Inject()(val currentProfileService: CurrentProfil
                                         val businessRegistrationConnector: BusinessRegistrationConnector,
                                         val companyRegistrationConnector: CompanyRegistrationConnector,
                                         val featureSwitches: PAYEFeatureSwitches,
-                                        val messagesApi: MessagesApi) extends PayeStartController with AuthRedirectUrls {
+                                        val messagesApi: MessagesApi,
+                                        val incorporationInformationConnector: IncorporationInformationConnector) extends PayeStartController with AuthRedirectUrls {
   override def publicBetaEnabled: Boolean = featureSwitches.publicBeta.enabled
   override def newApiEnabled: Boolean = featureSwitches.newApiStructure.enabled
 }
@@ -87,7 +88,7 @@ trait PayeStartController extends PayeBaseController {
   def restartPaye: Action[AnyContent] = isAuthorised { implicit request =>
     for {
       (regId, txId) <- getRegIdAndTxId
-      deleted       <- payeRegistrationService.deletePayeRegistrationDocument(regId, txId)
+      deleted       <- payeRegistrationService.deleteRejectedRegistration(regId, txId)
     } yield deleted match {
       case RegistrationDeletion.success       => Redirect(routes.PayeStartController.startPaye())
       case RegistrationDeletion.invalidStatus => Redirect(controllers.userJourney.routes.DashboardController.dashboard())

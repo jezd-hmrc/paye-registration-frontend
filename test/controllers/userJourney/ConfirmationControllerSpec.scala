@@ -51,6 +51,7 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val keystoreConnector        = mockKeystoreConnector
       override val confirmationService      = mockConfirmationService
       implicit val messagesApi: MessagesApi = mockMessagesApi
+      override val incorporationInformationConnector = mockIncorpInfoConnector
     }
   }
 

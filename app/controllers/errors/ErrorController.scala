@@ -17,7 +17,7 @@
 package controllers.errors
 
 import javax.inject.Inject
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
@@ -35,7 +35,8 @@ class ErrorControllerImpl @Inject()(val messagesApi: MessagesApi,
                                     val companyDetailsService: CompanyDetailsService,
                                     val s4LService: S4LService,
                                     val incorpInfoService: IncorporationInformationService,
-                                    val authConnector: AuthConnector) extends ErrorController with AuthRedirectUrls
+                                    val authConnector: AuthConnector,
+                                    val incorporationInformationConnector: IncorporationInformationConnector) extends ErrorController with AuthRedirectUrls
 
 trait ErrorController extends PayeBaseController {
 

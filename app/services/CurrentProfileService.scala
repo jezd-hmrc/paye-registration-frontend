@@ -31,7 +31,8 @@ import scala.concurrent.Future
 class CurrentProfileServiceImpl @Inject()(val businessRegistrationConnector: BusinessRegistrationConnector,
                                           val payeRegistrationConnector: PAYERegistrationConnector,
                                           val keystoreConnector: KeystoreConnector,
-                                          val companyRegistrationConnector: CompanyRegistrationConnector) extends CurrentProfileService
+                                          val companyRegistrationConnector: CompanyRegistrationConnector,
+                                          val incorporationInformationConnector: IncorporationInformationConnector) extends CurrentProfileService
 
 trait CurrentProfileService extends RegistrationWhitelist {
 
@@ -39,6 +40,7 @@ trait CurrentProfileService extends RegistrationWhitelist {
   val payeRegistrationConnector: PAYERegistrationConnector
   val companyRegistrationConnector: CompanyRegistrationConnector
   val keystoreConnector: KeystoreConnector
+  val incorporationInformationConnector: IncorporationInformationConnector
 
   def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier) : Future[CurrentProfile] = {
     for {
@@ -48,7 +50,8 @@ trait CurrentProfileService extends RegistrationWhitelist {
       }
       oRegStatus      <- payeRegistrationConnector.getStatus(businessProfile.registrationID)
       submitted       =  regSubmitted(oRegStatus)
-      currentProfile  = CurrentProfile(businessProfile.registrationID, companyProfile, businessProfile.language, submitted, None)
+      incorpStatus    <- incorporationInformationConnector.setupSubscription(companyProfile.transactionId,businessProfile.registrationID)
+      currentProfile  =  CurrentProfile(businessProfile.registrationID, companyProfile, businessProfile.language, submitted, incorpStatus)
       _               <- keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, businessProfile.registrationID, companyProfile.transactionId, currentProfile)
     } yield {
       currentProfile

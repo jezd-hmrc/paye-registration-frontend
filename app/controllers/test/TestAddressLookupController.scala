@@ -17,8 +17,7 @@
 package controllers.test
 
 import javax.inject.Inject
-
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import models.Address
@@ -36,7 +35,8 @@ class TestAddressLookupControllerImpl @Inject()(val messagesApi: MessagesApi,
                                                 val authConnector: AuthConnector,
                                                 val s4LService: S4LService,
                                                 val incorpInfoService: IncorporationInformationService,
-                                                val prepopService: PrepopulationService) extends TestAddressLookupController with AuthRedirectUrls
+                                                val prepopService: PrepopulationService,
+                                                val incorporationInformationConnector: IncorporationInformationConnector) extends TestAddressLookupController with AuthRedirectUrls
 
 trait TestAddressLookupController extends PayeBaseController {
   val companyDetailsService: CompanyDetailsService

@@ -16,6 +16,7 @@
 
 package controllers
 
+import connectors.IncorporationInformationConnector
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.CurrentProfile
 import org.mockito.ArgumentMatchers
@@ -41,6 +42,7 @@ class PayeBaseControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val messagesApi             = mockMessagesApi
       override val authConnector           = mockAuthConnector
       override val keystoreConnector       = mockKeystoreConnector
+      override val incorporationInformationConnector = mockIncorpInfoConnector
     }
 
     def testOkFunction(msg: String): Future[Result] = Future.successful(Ok(msg))

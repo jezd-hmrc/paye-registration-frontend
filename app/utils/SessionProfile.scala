@@ -17,7 +17,7 @@
 package utils
 
 import common.exceptions.InternalExceptions
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import enums.{CacheKeys, IncorporationStatus}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.mvc.Results.Redirect
@@ -30,6 +30,7 @@ import scala.util.Try
 
 trait SessionProfile extends InternalExceptions {
   val keystoreConnector: KeystoreConnector
+  val incorporationInformationConnector: IncorporationInformationConnector
 
   def withCurrentProfile(f: => CurrentProfile => Future[Result], checkSubmissionStatus: Boolean = true)(implicit request: Request[_],  hc: HeaderCarrier): Future[Result] = {
     keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
@@ -37,8 +38,14 @@ trait SessionProfile extends InternalExceptions {
         currentProfileChecks(currentProfile, checkSubmissionStatus)(f)
       case None => keystoreConnector.fetchAndGetFromKeystore(CacheKeys.CurrentProfile.toString) flatMap {
         _.fold(Future.successful(Redirect(controllers.userJourney.routes.PayeStartController.startPaye()))) { cp =>
-          //TODO: II Subscription to cover inflight users getting rejected
-          currentProfileChecks(cp, checkSubmissionStatus)(f)
+          incorporationInformationConnector.setupSubscription(cp.companyTaxRegistration.transactionId, cp.registrationID) flatMap { res =>
+            if (res.contains(IncorporationStatus.rejected)) {
+              //TODO: add code cleanup registration
+              Future.successful(Redirect(controllers.userJourney.routes.SignInOutController.incorporationRejected()))
+            } else {
+              currentProfileChecks(cp, checkSubmissionStatus)(f)
+            }
+          }
         }
       }
     }

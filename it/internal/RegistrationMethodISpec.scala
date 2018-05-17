@@ -97,7 +97,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubGet(s"/keystore/paye-registration-frontend/$SessionId", 404, "")
+      stubSessionCacheMetadata(SessionId,regId,false)
 
       val businessProfile = BusinessProfile(
         regId,
@@ -116,14 +116,13 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
       stubGet(s"/incorporation-frontend-stubs/$regId/corporation-tax-registration", 200, companyRegistrationResp)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/keystore/paye-registration-frontend/$SessionId/data/CurrentProfile", 200, dummyS4LResponse)
+      stubPost(s"/incorporation-information/subscribe/000-434-$regId/regime/paye-fe/subscriber/SCRS", 202, "")
 
       val fResponse = buildClientInternal(s"/4/delete").
         withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)
-
       response.status mustBe 400
     }
 
@@ -143,7 +142,6 @@ class RegistrationMethodISpec extends IntegrationSpecBase
         delete()
 
       val response = await(fResponse)
-
       response.status mustBe 412
     }
 

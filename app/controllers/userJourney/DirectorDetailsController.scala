@@ -17,8 +17,7 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.directorDetails.DirectorDetailsForm
 import play.api.Configuration
@@ -35,7 +34,8 @@ class DirectorDetailsControllerImpl @Inject()(val messagesApi: MessagesApi,
                                               val s4LService: S4LService,
                                               val companyDetailsService: CompanyDetailsService,
                                               val incorpInfoService: IncorporationInformationService,
-                                              val authConnector: AuthConnector) extends DirectorDetailsController with AuthRedirectUrls
+                                              val authConnector: AuthConnector,
+                                              val incorporationInformationConnector: IncorporationInformationConnector) extends DirectorDetailsController with AuthRedirectUrls
 
 trait DirectorDetailsController extends PayeBaseController {
   val directorDetailsService : DirectorDetailsService

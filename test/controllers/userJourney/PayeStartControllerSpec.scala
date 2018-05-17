@@ -54,6 +54,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val keystoreConnector              = mockKeystoreConnector
       override val businessRegistrationConnector  = mockBusinessRegistrationConnector
       override val companyRegistrationConnector   = mockCompRegConnector
+      override val incorporationInformationConnector = mockIncorpInfoConnector
     }
   }
 
@@ -203,7 +204,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(validCurrentProfile("rejected"))))
 
-        when(mockPayeRegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPayeRegService.deleteRejectedRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future(RegistrationDeletion.success))
 
         AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {
@@ -233,7 +234,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future(testCompanyProfile))
 
-        when(mockPayeRegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPayeRegService.deleteRejectedRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future(RegistrationDeletion.success))
 
         AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {
@@ -249,7 +250,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(validCurrentProfile("rejected"))))
 
-        when(mockPayeRegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPayeRegService.deleteRejectedRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future(RegistrationDeletion.invalidStatus))
 
         AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {

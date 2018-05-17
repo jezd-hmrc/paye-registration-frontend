@@ -38,7 +38,8 @@ class BusinessProfileControllerImpl @Inject()(val messagesApi: MessagesApi,
                                               val s4LService: S4LService,
                                               val companyDetailsService: CompanyDetailsService,
                                               val incorpInfoService: IncorporationInformationService,
-                                              val testBusinessRegConnector: TestBusinessRegConnector) extends BusinessProfileController with AuthRedirectUrls
+                                              val testBusinessRegConnector: TestBusinessRegConnector,
+                                              val incorporationInformationConnector: IncorporationInformationConnector) extends BusinessProfileController with AuthRedirectUrls
 
 trait BusinessProfileController extends PayeBaseController {
   val businessRegConnector: BusinessRegistrationConnector

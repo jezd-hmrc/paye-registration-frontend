@@ -33,6 +33,7 @@ class SessionProfileSpec extends PayeComponentSpec {
   class Setup extends CodeMocks {
     val testSession = new SessionProfile {
       override val keystoreConnector = mockKeystoreConnector
+      override val incorporationInformationConnector = mockIncorpInfoConnector
     }
   }
 
@@ -74,6 +75,9 @@ class SessionProfileSpec extends PayeComponentSpec {
         mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, None)
         when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(cp))
+
+        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(None))
 
         val result = testSession.withCurrentProfile { _ => testFunc }
         status(result) mustBe OK

@@ -17,8 +17,7 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.employmentDetails._
 import models.view.{EmployingStaff, Subcontractors}
@@ -39,7 +38,8 @@ class EmploymentControllerImpl @Inject()(val employmentService: EmploymentServic
                                          val s4LService: S4LService,
                                          val companyDetailsService: CompanyDetailsService,
                                          val incorpInfoService: IncorporationInformationService,
-                                         implicit val messagesApi: MessagesApi) extends EmploymentController with AuthRedirectUrls
+                                         implicit val messagesApi: MessagesApi,
+                                         val incorporationInformationConnector: IncorporationInformationConnector) extends EmploymentController with AuthRedirectUrls
 
 trait EmploymentController extends PayeBaseController {
   val employmentService: EmploymentService

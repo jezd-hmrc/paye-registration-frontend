@@ -49,12 +49,12 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
   extends ReactiveRepository[DatedSessionMap, BSONObjectID](config.getString("appName").get, mongo, DatedSessionMap.formats) {
 
   val fieldName        = "lastUpdated"
-  val createdIndexName = "sessionRegistrationIndex"
+  val sessionRegistrationIndexIndex = "sessionRegistrationIndex"
 
   val expireAfterSeconds = "expireAfterSeconds"
   val timeToLiveInSeconds: Int = config.getInt("mongodb.timeToLiveInSeconds").get
 
-  createIndex(Seq("sessionId", "transactionId", "registrationId"), createdIndexName, timeToLiveInSeconds)
+  createIndex(Seq("sessionId", "transactionId", "registrationId"), sessionRegistrationIndexIndex, timeToLiveInSeconds)
 
   private def createIndex(fields: Seq[String], indexName: String, ttl: Int): Future[Boolean] = {
     val indexes = fields.map(field => (field, IndexType.Ascending))
@@ -92,11 +92,14 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
     getSessionMapByKey("sessionId", id)
 
 
-  def getSessionMapByTransactionId(id: String): Future[Option[SessionMap]] =
-    getSessionMapByKey("tranasctionId", id)
+  def getLatestSessionMapByTransactionId(id: String): Future[Option[SessionMap]] =
+    getLatestSessionMapByKey("tranasctionId", id)
 
   private def getSessionMapByKey(key: String, id: String): Future[Option[SessionMap]] =
     collection.find(Json.obj(key -> id)).one[SessionMap]
+
+  private def getLatestSessionMapByKey(key: String, id: String): Future[Option[SessionMap]] =
+    collection.find(Json.obj(key -> id)).sort(Json.obj("lastUpdated" -> -1)).one[SessionMap]
 }
 
 @Singleton

@@ -23,4 +23,5 @@ object IncorporationStatus extends Enumeration {
   val rejected = Value
 
   implicit val format = Format(Reads.enumNameReads(IncorporationStatus), Writes.enumNameWrites)
+
 }

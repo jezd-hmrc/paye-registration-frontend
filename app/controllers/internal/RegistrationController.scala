@@ -16,7 +16,7 @@
 
 package controllers.internal
 
-import connectors.{KeystoreConnector, PAYERegistrationConnector}
+import connectors.{IncorporationInformationConnector, KeystoreConnector, PAYERegistrationConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{IncorporationStatus, RegistrationDeletion}
 import javax.inject.Inject
@@ -40,7 +40,8 @@ class RegistrationControllerImpl @Inject()(val keystoreConnector: KeystoreConnec
                                            val s4LService: S4LService,
                                            val config: Configuration,
                                            val incorpInfoService: IncorporationInformationService,
-                                           val payeRegistrationService: PAYERegistrationService) extends RegistrationController with AuthRedirectUrls
+                                           val payeRegistrationService: PAYERegistrationService,
+                                           val incorporationInformationConnector: IncorporationInformationConnector) extends RegistrationController with AuthRedirectUrls
 
 trait RegistrationController extends PayeBaseController {
   val payeRegistrationConnector: PAYERegistrationConnector
@@ -67,7 +68,7 @@ trait RegistrationController extends PayeBaseController {
     }
   }
 
-  def incorporationRejected: Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def companyIncorporation: Action[JsValue] = Action.async(parse.json) { implicit request =>
     val jsResp = request.body.as[JsObject]
     val txId = (jsResp \ "IncorpSubscriptionKey" \ "transactionId").as[String]
     val incorpStatus = (jsResp \ "IncorpSubscriptionKey" \ "transactionId").as[IncorporationStatus.Value]

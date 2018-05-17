@@ -17,9 +17,8 @@
 package controllers.test
 
 import javax.inject.Inject
-
 import connectors.test.TestBusinessRegConnector
-import connectors.{KeystoreConnector, PAYERegistrationConnector}
+import connectors.{IncorporationInformationConnector, KeystoreConnector, PAYERegistrationConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.test.TestCCUpdateForm
 import play.api.Configuration
@@ -39,7 +38,8 @@ class TestCCControllerImpl @Inject()(val messagesApi: MessagesApi,
                                      val config: Configuration,
                                      val companyDetailsService: CompanyDetailsService,
                                      val incorpInfoService: IncorporationInformationService,
-                                     val payeRegistrationConnector: PAYERegistrationConnector) extends TestCCController with AuthRedirectUrls
+                                     val payeRegistrationConnector: PAYERegistrationConnector,
+                                     val incorporationInformationConnector: IncorporationInformationConnector) extends TestCCController with AuthRedirectUrls
 
 trait TestCCController extends PayeBaseController {
   val testBusRegConnector: TestBusinessRegConnector

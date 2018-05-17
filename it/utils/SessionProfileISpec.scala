@@ -1,7 +1,7 @@
 
 package utils
 
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.CurrentProfile
 import play.api.Application
@@ -53,6 +53,7 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sessionId)))
 
   lazy val mockKeystoreConnector = app.injector.instanceOf[KeystoreConnector]
+  lazy val mockIncorporationInformationConnector = app.injector.instanceOf[IncorporationInformationConnector]
 
   implicit val fakeRequest = FakeRequest("GET", "/")
   val testFunc: CurrentProfile => Future[Result] = _ => Future.successful(Ok)
@@ -61,6 +62,7 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
   trait Setup {
     val sessionProfile = new SessionProfile {
       override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
+      override val incorporationInformationConnector: IncorporationInformationConnector = mockIncorporationInformationConnector
     }
   }
 
@@ -93,7 +95,7 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
             | }
             |}""".stripMargin).toString()
         stubGet(s"/keystore/paye-registration-frontend/$sessionId", 200, currentProfile)
-
+        stubPost(s"/incorporation-information/subscribe/$regId/regime/paye-fe/subscriber/SCRS", 202, "")
         val res = await(sessionProfile.withCurrentProfile(testFunc))
         res.header.status mustBe OK
       }

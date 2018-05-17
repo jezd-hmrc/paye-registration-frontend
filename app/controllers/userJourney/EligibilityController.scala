@@ -17,8 +17,7 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.eligibility.{CompanyEligibilityForm, DirectorEligibilityForm}
 import play.api.i18n.MessagesApi
@@ -40,7 +39,8 @@ class EligibilityControllerImpl @Inject()(val messagesApi: MessagesApi,
                                           val s4LService: S4LService,
                                           val companyDetailsService: CompanyDetailsService,
                                           val incorpInfoService: IncorporationInformationService,
-                                          servicesConfig: ServicesConfig) extends EligibilityController with AuthRedirectUrls
+                                          servicesConfig: ServicesConfig,
+                                          val incorporationInformationConnector: IncorporationInformationConnector) extends EligibilityController with AuthRedirectUrls
 
 trait EligibilityController extends PayeBaseController {
   val eligibilityService: EligibilityService

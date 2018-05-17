@@ -673,12 +673,12 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     }
   }
 
-  "deleteCurrentRegistrationDocument" should {
+  "deleteRejectedRegistrationDocument" should {
     "return a RegistrationDeletion Success" in new Setup {
       when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
-      val result = await(connector.deleteCurrentRegistrationDocument("testRegId", "testTxID"))
+      val result = await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID"))
       result mustBe RegistrationDeletion.success
     }
 
@@ -686,14 +686,14 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
       when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream5xxResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
-      intercept[Upstream5xxResponse](await(connector.deleteCurrentRegistrationDocument("testRegId", "testTxID")))
+      intercept[Upstream5xxResponse](await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID")))
     }
 
     "return a RegistrationDeletion invalidStatus" in new Setup {
       when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED)))
 
-      val result = await(connector.deleteCurrentRegistrationDocument("testRegId", "testTxID"))
+      val result = await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID"))
       result mustBe RegistrationDeletion.invalidStatus
     }
   }
