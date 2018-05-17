@@ -59,6 +59,12 @@ trait KeystoreConnector {
     }
   }
 
+  def cacheSessionMapByTransactionId(txId: String, map: SessionMap)(implicit hc: HeaderCarrier): Future[SessionMap] = {
+    metricsService.processDataResponseWithMetrics[SessionMap](successCounter, failedCounter, timer) {
+      sessionRepository().upsertSessionMapByTransactionId(txId, map) map(_ => map)
+    }
+  }
+
   def fetch()(implicit hc : HeaderCarrier) : Future[Option[SessionMap]] = {
     metricsService.processOptionalDataWithMetrics[SessionMap](successCounter, emptyResponseCounter, timer) {
       sessionRepository().getSessionMap(sessionID)
@@ -79,6 +85,14 @@ trait KeystoreConnector {
   def fetchAndGet[T](key : String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
     metricsService.processOptionalDataWithMetrics[T](successCounter, emptyResponseCounter, timer) {
       sessionRepository().getSessionMap(sessionID).map {
+        _.flatMap(_.getEntry(key))
+      }
+    }
+  }
+
+  def fetchByTransactionId[T](key: String, txId: String)(implicit hc: HeaderCarrier): Future[Option[CurrentProfile]] = {
+    metricsService.processOptionalDataWithMetrics(successCounter, emptyResponseCounter, timer) {
+      sessionRepository().getSessionMapByTransactionId(txId).map{
         _.flatMap(_.getEntry(key))
       }
     }

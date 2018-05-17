@@ -69,8 +69,15 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
     }
   }
 
-  def upsertSessionMap(sm: SessionMap): Future[Boolean] = {
-    val selector   = Json.obj("sessionId" -> sm.sessionId)
+  def upsertSessionMap(sm: SessionMap): Future[Boolean] =
+    upsertSessionMapByKey("sessionId", sm.sessionId, sm)
+
+  def upsertSessionMapByTransactionId(txId: String, sm: SessionMap): Future[Boolean] =
+    upsertSessionMapByKey("transactionId", txId, sm)
+
+
+  private def upsertSessionMapByKey(key: String, id: String, sm: SessionMap): Future[Boolean] = {
+    val selector   = Json.obj(key -> id)
     val cmDocument = Json.toJson(DatedSessionMap(sm))
     val modifier   = BSONDocument("$set" -> cmDocument)
 
@@ -81,9 +88,15 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
     collection.remove(BSONDocument("sessionId" -> id)).map(_.ok)
   }
 
-  def getSessionMap(id: String): Future[Option[SessionMap]] = {
-    collection.find(Json.obj("sessionId" -> id)).one[SessionMap]
-  }
+  def getSessionMap(id: String): Future[Option[SessionMap]] =
+    getSessionMapByKey("sessionId", id)
+
+
+  def getSessionMapByTransactionId(id: String): Future[Option[SessionMap]] =
+    getSessionMapByKey("tranasctionId", id)
+
+  private def getSessionMapByKey(key: String, id: String): Future[Option[SessionMap]] =
+    collection.find(Json.obj(key -> id)).one[SessionMap]
 }
 
 @Singleton

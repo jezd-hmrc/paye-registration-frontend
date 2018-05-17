@@ -72,6 +72,7 @@ trait RegistrationController extends PayeBaseController {
     val txId = (jsResp \ "IncorpSubscriptionKey" \ "transactionId").as[String]
     val incorpStatus = (jsResp \ "IncorpSubscriptionKey" \ "transactionId").as[String]
 
+
     Future.successful(Ok(txId))
   }
 }

@@ -17,9 +17,8 @@
 package services
 
 import javax.inject.Inject
-
 import connectors._
-import enums.{CacheKeys, PAYEStatus}
+import enums.{CacheKeys, IncorporationStatus, PAYEStatus}
 import models.external.CurrentProfile
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -51,6 +50,12 @@ trait CurrentProfileService extends RegistrationWhitelist {
       _               <- keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, businessProfile.registrationID, companyProfile.transactionId, currentProfile)
     } yield {
       currentProfile
+    }
+  }
+
+  def updateCurrentProfileWithIncorpStatus(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier): Future[Option[CurrentProfile]] = {
+    keystoreConnector.fetchByTransactionId[CurrentProfile](CacheKeys.CurrentProfile.toString, txId).map{ oProfile =>
+      oProfile.map(profile => profile.copy(incorpStatus = Some(status)))
     }
   }
 
