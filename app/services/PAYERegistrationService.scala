@@ -18,7 +18,7 @@ package services
 
 import javax.inject.Inject
 import connectors._
-import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
+import enums.{CacheKeys, DownstreamOutcome, IncorporationStatus, RegistrationDeletion}
 import models.external.CurrentProfile
 import play.api.Logger
 import play.api.http.Status._
@@ -52,7 +52,19 @@ trait PAYERegistrationService {
     }
   }
 
-  def tearDownUserDate(txId: String)(implicit hc: HeaderCarrier): Future[_] = ???
+  def handleIIResponse(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier): Future[Unit] = {
+    for {
+      oRegIdFromCp  <- currentProfileService.updateCurrentProfileWithIncorpStatus(txId, status)
+      regId         <- oRegIdFromCp.fold(payeRegistrationConnector.getRegistrationId(txId))(Future.successful)
+      _             <- tearDownUserData(regId, txId) if status == IncorporationStatus.rejected
+    } yield ()
+  }
+
+  private def tearDownUserData(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Boolean] = for{
+    _         <- s4LService.clear(regId)
+    response  <- deletePayeRegistrationDocument(regId, txId)
+    success   = response == RegistrationDeletion.success
+  } yield success
 
   def deletePayeRegistrationInProgress(regId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
     getCurrentProfile flatMap { profile =>

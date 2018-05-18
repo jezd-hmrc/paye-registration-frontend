@@ -91,6 +91,32 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     }
   }
 
+  "Calling getRegistrationId" should {
+    "return a valid regId" in new Setup {
+      mockHttpGet[String]("test-url", "returnRegId")
+
+      await(connector.getRegistrationId("testTxID")) mustBe "returnRegId"
+    }
+
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[PAYERegistrationAPI]("test-url", forbidden)
+
+      intercept[Upstream4xxResponse](await(connector.getRegistration("tstID")))
+    }
+
+    "return the correct PAYEResponse when a Not Found response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[PAYERegistrationAPI]("test-url", notFound)
+
+      intercept[NotFoundException](await(connector.getRegistration("tstID")))
+    }
+
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[PAYERegistrationAPI]("test-url", internalServiceException)
+
+      intercept[InternalServerException](await(connector.getRegistration("tstID")))
+    }
+  }
+
   "Calling getRegistration" should {
     "return the correct PAYEResponse when the microservice returns a PAYE Registration model" in new Setup {
       mockHttpGet[PAYERegistrationAPI]("tst-url", Fixtures.validPAYERegistrationAPI)

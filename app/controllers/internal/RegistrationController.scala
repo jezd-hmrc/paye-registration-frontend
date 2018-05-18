@@ -18,7 +18,7 @@ package controllers.internal
 
 import connectors.{KeystoreConnector, PAYERegistrationConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
-import enums.RegistrationDeletion
+import enums.{IncorporationStatus, RegistrationDeletion}
 import javax.inject.Inject
 import play.api.{Configuration, Logger}
 import play.api.i18n.MessagesApi
@@ -70,9 +70,12 @@ trait RegistrationController extends PayeBaseController {
   def incorporationRejected: Action[JsValue] = Action.async(parse.json) { implicit request =>
     val jsResp = request.body.as[JsObject]
     val txId = (jsResp \ "IncorpSubscriptionKey" \ "transactionId").as[String]
-    val incorpStatus = (jsResp \ "IncorpSubscriptionKey" \ "transactionId").as[String]
+    val incorpStatus = (jsResp \ "IncorpSubscriptionKey" \ "transactionId").as[IncorporationStatus.Value]
 
-
-    Future.successful(Ok(txId))
+    payeRegistrationService.handleIIResponse(txId, incorpStatus).map{
+      _ => Ok
+    } recover {
+      case _: Exception => InternalServerError
+    }
   }
 }

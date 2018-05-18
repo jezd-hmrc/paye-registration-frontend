@@ -61,7 +61,11 @@ trait CurrentProfileService extends RegistrationWhitelist {
       session.copy(data = Map(CacheKeys.CurrentProfile.toString -> Json.toJson(updatedCp)))
   }
 
-  def updateCurrentProfileWithIncorpStatus(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier):Future[Option[SessionMap]] = ???
+  def updateCurrentProfileWithIncorpStatus(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier):Future[Option[String]] =  for {
+    updatedSessionMap <- keystoreConnector.fetchByTransactionId(txId).map(updateSessionMap(_, status))
+    _                 = updatedSessionMap.map(sessionMap => keystoreConnector.cacheSessionMapByTransactionId(txId, sessionMap))
+    regId             = updatedSessionMap.flatMap(_.getEntry[CurrentProfile](CacheKeys.CurrentProfile.toString).map(_.registrationID))
+  } yield regId
 
   private[services] def regSubmitted(oRegStatus: Option[PAYEStatus.Value]): Boolean = {
     oRegStatus.exists {
