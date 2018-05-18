@@ -19,7 +19,9 @@ package services
 import javax.inject.Inject
 import connectors._
 import enums.{CacheKeys, IncorporationStatus, PAYEStatus}
+import models.api.SessionMap
 import models.external.CurrentProfile
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationWhitelist
@@ -53,11 +55,13 @@ trait CurrentProfileService extends RegistrationWhitelist {
     }
   }
 
-  def updateCurrentProfileWithIncorpStatus(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier): Future[Option[CurrentProfile]] = {
-    keystoreConnector.fetchByTransactionId[CurrentProfile](CacheKeys.CurrentProfile.toString, txId).map{ oProfile =>
-      oProfile.map(profile => profile.copy(incorpStatus = Some(status)))
-    }
+  private def updateSessionMap(sessionMap: Option[SessionMap], status: IncorporationStatus.Value): Option[SessionMap] = sessionMap.map {
+    session =>
+      val updatedCp = session.getEntry[CurrentProfile](CacheKeys.CurrentProfile.toString).map(_.copy(incorpStatus = Some(status)))
+      session.copy(data = Map(CacheKeys.CurrentProfile.toString -> Json.toJson(updatedCp)))
   }
+
+  def updateCurrentProfileWithIncorpStatus(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier):Future[Option[SessionMap]] = ???
 
   private[services] def regSubmitted(oRegStatus: Option[PAYEStatus.Value]): Boolean = {
     oRegStatus.exists {

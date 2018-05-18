@@ -52,11 +52,9 @@ trait PAYERegistrationService {
     }
   }
 
-  def tearDownUserDate(txId: String)(implicit hc: HeaderCarrier): Future[_] = {
+  def tearDownUserDate(txId: String)(implicit hc: HeaderCarrier): Future[_] = ???
 
-  }
-
-  private def deletePayeRegistrationInProgress(regId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+  def deletePayeRegistrationInProgress(regId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
     getCurrentProfile flatMap { profile =>
       if( regId != profile.registrationID ) {
         Future.successful(RegistrationDeletion.forbidden)

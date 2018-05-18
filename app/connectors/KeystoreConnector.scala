@@ -90,11 +90,9 @@ trait KeystoreConnector {
     }
   }
 
-  def fetchByTransactionId[T](key: String, txId: String)(implicit hc: HeaderCarrier): Future[Option[CurrentProfile]] = {
+  def fetchByTransactionId(txId: String)(implicit hc: HeaderCarrier): Future[Option[SessionMap]] = {
     metricsService.processOptionalDataWithMetrics(successCounter, emptyResponseCounter, timer) {
-      sessionRepository().getSessionMapByTransactionId(txId).map{
-        _.flatMap(_.getEntry(key))
-      }
+      sessionRepository().getSessionMapByTransactionId(txId)
     }
   }
 
