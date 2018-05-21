@@ -20,7 +20,7 @@ import connectors.{IncorporationInformationConnector, KeystoreConnector, PAYEReg
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{IncorporationStatus, RegistrationDeletion}
 import javax.inject.Inject
-import play.api.{Configuration, Logger}
+import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsObject, JsSuccess, JsValue}
 import play.api.mvc.{Action, AnyContent}
@@ -69,17 +69,20 @@ trait RegistrationController extends PayeBaseController {
   }
 
   def companyIncorporation: Action[JsValue] = Action.async(parse.json) { implicit request =>
-    val jsResp = request.body.as[JsObject]
-    val txId = (jsResp \ "SCRSIncorpStatus" \ "IncorpSubscriptionKey" \ "transactionId").validate[String]
+    val jsResp       = request.body.as[JsObject]
+    val txId         = (jsResp \ "SCRSIncorpStatus" \ "IncorpSubscriptionKey" \ "transactionId").validate[String]
     val incorpStatus = (jsResp \ "SCRSIncorpStatus" \ "IncorpStatusEvent" \ "status").validate[IncorporationStatus.Value]
 
 
     (txId, incorpStatus) match {
-      case (JsSuccess(id, _), JsSuccess(status, _)) => payeRegistrationService.handleIIResponse(id, status).map{ _ => Ok } recover {
-        case _: Exception => InternalServerError }
-      case _  => Logger.error(s"Incorp Status or transaction Id not received or invalid from II for txId $txId")
+      case (JsSuccess(id, _), JsSuccess(status, _)) => payeRegistrationService.handleIIResponse(id, status).map{
+        _ => Ok
+      } recover {
+        case _: Exception => InternalServerError
+      }
+      case _ =>
+        logger.error(s"Incorp Status or transaction Id not received or invalid from II for txId $txId")
         Future.successful(InternalServerError)
     }
-
   }
 }
