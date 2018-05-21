@@ -243,4 +243,10 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
     }
   }
+
+  "companyIncorporation" should {
+    "return an Ok" in {
+      
+    }
+  }
 }

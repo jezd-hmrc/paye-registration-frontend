@@ -159,4 +159,24 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
       }
     }
   }
+
+  "getLatestSessionMapByTransactionId" should {
+    val testCP = currentProfile("testRegId", "testTxId")
+
+    val testSessionMap = SessionMap(
+      sessionId      = "testSessionId",
+      registrationId = "testRegId",
+      transactionId  = "testTxId",
+      data           = Map(
+        "CurrentProfile" -> Json.toJson(testCP)
+      )
+    )
+
+    "return a session map" in new Setup {
+      await(connector.cacheSessionMap(testSessionMap))
+
+      val result = await(connector.fetchByTransactionId("testTxId"))
+      result mustBe Some(testSessionMap)
+    }
+  }
 }

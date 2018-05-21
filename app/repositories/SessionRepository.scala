@@ -72,10 +72,6 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
   def upsertSessionMap(sm: SessionMap): Future[Boolean] =
     upsertSessionMapByKey("sessionId", sm.sessionId, sm)
 
-  def upsertSessionMapByTransactionId(txId: String, sm: SessionMap): Future[Boolean] =
-    upsertSessionMapByKey("transactionId", txId, sm)
-
-
   private def upsertSessionMapByKey(key: String, id: String, sm: SessionMap): Future[Boolean] = {
     val selector   = Json.obj(key -> id)
     val cmDocument = Json.toJson(DatedSessionMap(sm))
@@ -93,7 +89,7 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
 
 
   def getLatestSessionMapByTransactionId(id: String): Future[Option[SessionMap]] =
-    getLatestSessionMapByKey("tranasctionId", id)
+    getLatestSessionMapByKey("transactionId", id)
 
   private def getSessionMapByKey(key: String, id: String): Future[Option[SessionMap]] =
     collection.find(Json.obj(key -> id)).one[SessionMap]

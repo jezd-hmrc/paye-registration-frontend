@@ -66,7 +66,7 @@ trait CurrentProfileService extends RegistrationWhitelist {
 
   def updateCurrentProfileWithIncorpStatus(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier):Future[Option[String]] =  for {
     updatedSessionMap <- keystoreConnector.fetchByTransactionId(txId).map(updateSessionMap(_, status))
-    _                 = updatedSessionMap.map(sessionMap => keystoreConnector.cacheSessionMapByTransactionId(txId, sessionMap))
+    _                 = updatedSessionMap.map(sessionMap => keystoreConnector.cacheSessionMap(sessionMap))
     regId             = updatedSessionMap.flatMap(_.getEntry[CurrentProfile](CacheKeys.CurrentProfile.toString).map(_.registrationID))
   } yield regId
 

@@ -59,9 +59,9 @@ trait KeystoreConnector {
     }
   }
 
-  def cacheSessionMapByTransactionId(txId: String, map: SessionMap)(implicit hc: HeaderCarrier): Future[SessionMap] = {
+  def cacheSessionMap(map: SessionMap)(implicit hc: HeaderCarrier): Future[SessionMap] = {
     metricsService.processDataResponseWithMetrics[SessionMap](successCounter, failedCounter, timer) {
-      sessionRepository().upsertSessionMapByTransactionId(txId, map) map(_ => map)
+      sessionRepository().upsertSessionMap(map) map(_ => map)
     }
   }
 

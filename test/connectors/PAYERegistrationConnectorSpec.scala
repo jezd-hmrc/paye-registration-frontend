@@ -697,4 +697,29 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
       result mustBe RegistrationDeletion.invalidStatus
     }
   }
+
+  "deleteRegistrationForRejectedIncorp" should {
+    "return a success" in new Setup {
+      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(HttpResponse(OK)))
+
+      val result = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
+      result mustBe RegistrationDeletion.success
+    }
+
+    "return an invalid status" in new Setup {
+      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(Upstream4xxResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED)))
+
+      val result = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
+      result mustBe RegistrationDeletion.invalidStatus
+    }
+
+    "throw an Upstream5xxResponse" in new Setup {
+      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(Upstream5xxResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
+
+      intercept[Upstream5xxResponse](await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId")))
+    }
+  }
 }

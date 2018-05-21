@@ -24,7 +24,7 @@ import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
@@ -134,6 +134,29 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
 
     "return false when no status is returned" in new Setup {
       service.regSubmitted(None) mustBe false
+    }
+  }
+
+  "updateCurrentProfileWithIncorpStatus" should {
+    "return some regId" in new Setup {
+
+      val testSessionMap = SessionMap(
+        sessionId      = "testSessionId",
+        registrationId = validCurrentProfile.registrationID,
+        transactionId  = validCurrentProfile.companyTaxRegistration.transactionId,
+        data           = Map(
+          "CurrentProfile" -> Json.toJson(validCurrentProfile)
+        )
+      )
+
+      when(mockKeystoreConnector.fetchByTransactionId(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(Some(testSessionMap)))
+
+      when(mockKeystoreConnector.cacheSessionMap(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(testSessionMap))
+
+      val result = await(service.updateCurrentProfileWithIncorpStatus(txId = "testTxId", status = IncorporationStatus.rejected))
+      result mustBe Some(validCurrentProfile.registrationID)
     }
   }
 }

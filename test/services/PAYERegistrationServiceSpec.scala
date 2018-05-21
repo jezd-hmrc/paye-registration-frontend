@@ -16,7 +16,7 @@
 
 package services
 
-import enums.{DownstreamOutcome, RegistrationDeletion}
+import enums.{DownstreamOutcome, IncorporationStatus, RegistrationDeletion}
 import helpers.PayeComponentSpec
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
@@ -82,6 +82,49 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
         val result = await(service.deleteRejectedRegistration("testRegId", "testTxId"))
         result mustBe RegistrationDeletion.invalidStatus
       }
+    }
+  }
+
+  "handleIIResponse" should {
+    "return a success" when {
+      "there is no regId in the current profile" in new Setup {
+        when(mockCurrentProfileService.updateCurrentProfileWithIncorpStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future(None))
+
+        when(mockPAYERegConnector.getRegistrationId(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future("testRegId"))
+
+        when(mockS4LService.clear(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future(HttpResponse(200)))
+
+        when(mockPAYERegConnector.deleteRegistrationForRejectedIncorp(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future(RegistrationDeletion.success))
+
+        val result = await(service.handleIIResponse(txId = "testTxId", status = IncorporationStatus.rejected))
+        result mustBe RegistrationDeletion.success
+      }
+
+      "there is a regId in the current profile" in new Setup {
+        when(mockCurrentProfileService.updateCurrentProfileWithIncorpStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future(Some("testRegId")))
+
+        when(mockS4LService.clear(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future(HttpResponse(200)))
+
+        when(mockPAYERegConnector.deleteRegistrationForRejectedIncorp(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future(RegistrationDeletion.success))
+
+        val result = await(service.handleIIResponse(txId = "testTxId", status = IncorporationStatus.rejected))
+        result mustBe RegistrationDeletion.success
+      }
+    }
+
+    "return an invalidStatus" in new Setup {
+      when(mockCurrentProfileService.updateCurrentProfileWithIncorpStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(None))
+
+      val result = await(service.handleIIResponse(txId = "testTxId", status = IncorporationStatus.accepted))
+      result mustBe RegistrationDeletion.invalidStatus
     }
   }
 }
