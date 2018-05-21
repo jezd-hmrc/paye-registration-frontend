@@ -38,6 +38,7 @@ class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val compRegFEURL: String = "testUrl"
       override val compRegFEURI: String = "/testUri"
       override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
     }
   }
 

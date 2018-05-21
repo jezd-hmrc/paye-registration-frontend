@@ -35,7 +35,8 @@ class ConfirmationControllerImpl @Inject()(val messagesApi: MessagesApi,
                                            val incorpInfoService: IncorporationInformationService,
                                            val emailService: EmailService,
                                            val authConnector: AuthConnector,
-                                           val incorporationInformationConnector: IncorporationInformationConnector) extends ConfirmationController with AuthRedirectUrls
+                                           val incorporationInformationConnector: IncorporationInformationConnector,
+                                           val payeRegistrationService: PAYERegistrationService) extends ConfirmationController with AuthRedirectUrls
 
 trait ConfirmationController extends PayeBaseController {
   val confirmationService: ConfirmationService

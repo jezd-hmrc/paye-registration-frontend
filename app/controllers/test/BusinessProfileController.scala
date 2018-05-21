@@ -17,7 +17,6 @@
 package controllers.test
 
 import javax.inject.Inject
-
 import connectors._
 import connectors.test.TestBusinessRegConnector
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -25,7 +24,7 @@ import models.external.BusinessProfile
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{AnyContent, Request}
-import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.Future
@@ -39,7 +38,8 @@ class BusinessProfileControllerImpl @Inject()(val messagesApi: MessagesApi,
                                               val companyDetailsService: CompanyDetailsService,
                                               val incorpInfoService: IncorporationInformationService,
                                               val testBusinessRegConnector: TestBusinessRegConnector,
-                                              val incorporationInformationConnector: IncorporationInformationConnector) extends BusinessProfileController with AuthRedirectUrls
+                                              val incorporationInformationConnector: IncorporationInformationConnector,
+                                              val payeRegistrationService: PAYERegistrationService) extends BusinessProfileController with AuthRedirectUrls
 
 trait BusinessProfileController extends PayeBaseController {
   val businessRegConnector: BusinessRegistrationConnector

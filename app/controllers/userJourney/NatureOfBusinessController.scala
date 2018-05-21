@@ -24,7 +24,7 @@ import forms.natureOfBuinessDetails.NatureOfBusinessForm
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CompanyDetailsService, IncorporationInformationService, NatureOfBusinessService, S4LService}
+import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
 
@@ -38,7 +38,8 @@ class NatureOfBusinessControllerImpl @Inject()(val messagesApi: MessagesApi,
                                                val companyDetailsService: CompanyDetailsService,
                                                val incorpInfoService: IncorporationInformationService,
                                                val authConnector: AuthConnector,
-                                               val incorporationInformationConnector: IncorporationInformationConnector) extends NatureOfBusinessController with AuthRedirectUrls
+                                               val incorporationInformationConnector: IncorporationInformationConnector,
+                                               val payeRegistrationService: PAYERegistrationService) extends NatureOfBusinessController with AuthRedirectUrls
 
 trait NatureOfBusinessController extends PayeBaseController {
   val authConnector: AuthConnector

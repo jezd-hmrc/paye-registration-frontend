@@ -43,6 +43,7 @@ class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedAp
       override val keystoreConnector      = mockKeystoreConnector
       override val prepopService          = mockPrepopService
       override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
     }
   }
 

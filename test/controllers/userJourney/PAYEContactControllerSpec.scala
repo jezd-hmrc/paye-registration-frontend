@@ -51,6 +51,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val prepopService          = mockPrepopService
       override val auditService           = mockAuditService
       override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
     }
   }
 

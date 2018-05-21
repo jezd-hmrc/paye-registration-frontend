@@ -16,7 +16,7 @@
 
 package utils
 
-import enums.{CacheKeys, IncorporationStatus}
+import enums.{CacheKeys, IncorporationStatus, RegistrationDeletion}
 import helpers.PayeComponentSpec
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
@@ -24,6 +24,7 @@ import play.api.mvc.Result
 import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
 import org.mockito.Mockito._
+import services.PAYERegistrationService
 
 import scala.concurrent.Future
 
@@ -32,8 +33,9 @@ class SessionProfileSpec extends PayeComponentSpec {
 
   class Setup extends CodeMocks {
     val testSession = new SessionProfile {
-      override val keystoreConnector = mockKeystoreConnector
-      override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val keystoreConnector                  = mockKeystoreConnector
+      override val incorporationInformationConnector  = mockIncorpInfoConnector
+      override val payeRegistrationService            = mockPayeRegService
     }
   }
 
@@ -46,7 +48,6 @@ class SessionProfileSpec extends PayeComponentSpec {
   "calling withCurrentProfile" should {
     "carry out the passed function when it is in the Session Repository" when {
       "payeRegistrationSubmitted is 'false'" in new Setup {
-
         mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile(false)))
 
         val result = testSession.withCurrentProfile { _ => testFunc }
@@ -70,7 +71,7 @@ class SessionProfileSpec extends PayeComponentSpec {
       }
     }
     "carry out the passed function when nothing is in the Session Repository but there is Something in keystore" when {
-      "payeRegistrationSubmitted is 'false' and ct is accepted" in new Setup {
+      "payeRegistrationSubmitted is 'false' and ct is pending" in new Setup {
         val cp = Some(validProfile(false, Some("04")))
         mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, None)
         when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
@@ -81,6 +82,35 @@ class SessionProfileSpec extends PayeComponentSpec {
 
         val result = testSession.withCurrentProfile { _ => testFunc }
         status(result) mustBe OK
+      }
+
+      "payeRegistrationSubmitted is 'false' and ct is accepted" in new Setup {
+        val cp = Some(validProfile(false, Some("04")))
+        mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, None)
+        when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+          .thenReturn(Future.successful(cp))
+
+        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(Some(IncorporationStatus.accepted)))
+
+        val result = testSession.withCurrentProfile { _ => testFunc }
+        status(result) mustBe OK
+      }
+
+      "payeRegistrationSubmitted is 'false' and ct is rejected" in new Setup {
+        val cp = Some(validProfile(false, Some("04")))
+        mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, None)
+        when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+          .thenReturn(Future.successful(cp))
+
+        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(Some(IncorporationStatus.rejected)))
+
+        when(mockPayeRegService.handleIIResponse(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(RegistrationDeletion.success))
+
+        val result = testSession.withCurrentProfile { _ => testFunc }
+        status(result) mustBe SEE_OTHER
       }
     }
 

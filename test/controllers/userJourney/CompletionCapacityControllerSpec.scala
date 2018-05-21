@@ -44,6 +44,7 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
       override val completionCapacityService = mockCompletionCapacityService
       override val keystoreConnector         = mockKeystoreConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService   = mockPayeRegService
     }
   }
   "completionCapacity" should {

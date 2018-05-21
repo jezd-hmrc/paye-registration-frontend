@@ -24,7 +24,7 @@ import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Environment}
-import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.Future
@@ -37,7 +37,8 @@ class SignInOutControllerImpl @Inject()(val messagesApi: MessagesApi,
                                         val companyDetailsService: CompanyDetailsService,
                                         val incorpInfoService: IncorporationInformationService,
                                         val keystoreConnector: KeystoreConnector,
-                                        val incorporationInformationConnector: IncorporationInformationConnector) extends SignInOutController with AuthRedirectUrls
+                                        val incorporationInformationConnector: IncorporationInformationConnector,
+                                        val payeRegistrationService: PAYERegistrationService) extends SignInOutController with AuthRedirectUrls
 
 trait SignInOutController extends PayeBaseController {
 

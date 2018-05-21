@@ -24,7 +24,7 @@ import forms.test.TestCoHoCompanyDetailsForm
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request}
-import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.Future
@@ -39,7 +39,8 @@ class TestCoHoControllerImpl @Inject()(val testIncorpInfoConnector: TestIncorpIn
                                        val companyDetailsService: CompanyDetailsService,
                                        val incorpInfoService: IncorporationInformationService,
                                        val messagesApi: MessagesApi,
-                                       val incorporationInformationConnector: IncorporationInformationConnector) extends TestCoHoController with AuthRedirectUrls
+                                       val incorporationInformationConnector: IncorporationInformationConnector,
+                                       val payeRegistrationService: PAYERegistrationService) extends TestCoHoController with AuthRedirectUrls
 
 trait TestCoHoController extends PayeBaseController {
   val testIncorpInfoConnector: TestIncorpInfoConnector

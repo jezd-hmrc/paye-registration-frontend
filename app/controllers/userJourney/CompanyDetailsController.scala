@@ -45,7 +45,8 @@ class CompanyDetailsControllerImpl @Inject()(val s4LService: S4LService,
                                              val prepopService: PrepopulationService,
                                              val config: Configuration,
                                              val auditService: AuditService,
-                                             val incorporationInformationConnector: IncorporationInformationConnector) extends CompanyDetailsController with AuthRedirectUrls
+                                             val incorporationInformationConnector: IncorporationInformationConnector,
+                                             val payeRegistrationService: PAYERegistrationService) extends CompanyDetailsController with AuthRedirectUrls
 
 trait CompanyDetailsController extends PayeBaseController {
   val s4LService: S4LService

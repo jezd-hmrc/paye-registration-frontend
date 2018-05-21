@@ -23,7 +23,7 @@ import forms.eligibility.{CompanyEligibilityForm, DirectorEligibilityForm}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Environment}
-import services.{CompanyDetailsService, EligibilityService, IncorporationInformationService, S4LService}
+import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import views.html.pages.eligibility.{companyEligibility => CompanyEligibilityPage, directorEligibility => DirectorEligibilityPage, ineligible => IneligiblePage}
@@ -40,7 +40,8 @@ class EligibilityControllerImpl @Inject()(val messagesApi: MessagesApi,
                                           val companyDetailsService: CompanyDetailsService,
                                           val incorpInfoService: IncorporationInformationService,
                                           servicesConfig: ServicesConfig,
-                                          val incorporationInformationConnector: IncorporationInformationConnector) extends EligibilityController with AuthRedirectUrls
+                                          val incorporationInformationConnector: IncorporationInformationConnector,
+                                          val payeRegistrationService: PAYERegistrationService) extends EligibilityController with AuthRedirectUrls
 
 trait EligibilityController extends PayeBaseController {
   val eligibilityService: EligibilityService

@@ -38,6 +38,7 @@ class WelcomeControllerSpec extends PayeComponentSpec with PayeFakedApp {
       implicit val messagesApi: MessagesApi = mockMessagesApi
       override val authConnector            = mockAuthConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService  = mockPayeRegService
     }
   }
 

@@ -1,6 +1,7 @@
 
 package utils
 
+import com.github.tomakehurst.wiremock.client.WireMock.{findAll, urlMatching, deleteRequestedFor}
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.CurrentProfile
@@ -12,6 +13,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
+import services.PAYERegistrationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 
@@ -28,6 +30,8 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
     "microservice.services.cachable.session-cache.host" -> s"$mockHost",
     "microservice.services.cachable.session-cache.port" -> s"$mockPort",
     "microservice.services.cachable.session-cache.domain" -> "keystore",
+    "microservice.services.cachable.short-lived-cache.host" -> s"$mockHost",
+    "microservice.services.cachable.short-lived-cache.port" -> s"$mockPort",
     "microservice.services.business-registration.host" -> s"$mockHost",
     "microservice.services.business-registration.port" -> s"$mockPort",
     "microservice.services.company-registration.host" -> s"$mockHost",
@@ -52,8 +56,9 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
   val sessionId = "session-123"
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sessionId)))
 
-  lazy val mockKeystoreConnector = app.injector.instanceOf[KeystoreConnector]
+  lazy val mockKeystoreConnector                 = app.injector.instanceOf[KeystoreConnector]
   lazy val mockIncorporationInformationConnector = app.injector.instanceOf[IncorporationInformationConnector]
+  lazy val mockPayeRegistrationService           = app.injector.instanceOf[PAYERegistrationService]
 
   implicit val fakeRequest = FakeRequest("GET", "/")
   val testFunc: CurrentProfile => Future[Result] = _ => Future.successful(Ok)
@@ -61,8 +66,9 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
 
   trait Setup {
     val sessionProfile = new SessionProfile {
-      override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
+      override val keystoreConnector: KeystoreConnector                                 = mockKeystoreConnector
       override val incorporationInformationConnector: IncorporationInformationConnector = mockIncorporationInformationConnector
+      override val payeRegistrationService: PAYERegistrationService                     = mockPayeRegistrationService
     }
   }
 
@@ -98,6 +104,61 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
         stubPost(s"/incorporation-information/subscribe/$regId/regime/paye-fe/subscriber/SCRS", 202, "")
         val res = await(sessionProfile.withCurrentProfile(testFunc))
         res.header.status mustBe OK
+      }
+
+      "in-flight user (not in SessionRepository - in Keystore) saves CurrentProfile into SessionRepository, do II subscription returns 200 rejected" in new Setup {
+        val txId = "12345"
+        val currentProfile = Json.parse(
+          s"""
+             |{
+             | "id" : "xxx",
+             | "data" : {
+             | "CurrentProfile" : {
+             |  "registrationID": "$regId",
+             |  "companyTaxRegistration": {
+             |     "status": "submitted",
+             |     "transactionId": "$txId"
+             |  },
+             |  "language": "ENG",
+             |  "payeRegistrationSubmitted": false
+             |  }
+             | }
+             |}""".stripMargin).toString()
+
+        val responseJson = Json.parse(
+          s"""
+             |{
+             | "SCRSIncorpStatus": {
+             |   "IncorpSubscriptionKey" : {
+             |     "transactionId" : "$txId",
+             |     "subscriber"    : "SCRS",
+             |     "discriminator" : "paye-fe"
+             |   },
+             |   "IncorpStatusEvent": {
+             |     "status" : "rejected",
+             |     "crn" : "12345678",
+             |     "description" : "test desc"
+             |   }
+             | }
+             |}
+      """.stripMargin).toString
+
+        stubGet(s"/keystore/paye-registration-frontend/$sessionId", 200, currentProfile)
+        stubPost(s"/incorporation-information/subscribe/$regId/regime/paye-fe/subscriber/SCRS", 200, responseJson)
+        stubGet(s"/paye-registration/$txId/registration-id", 200, Json.toJson(regId).toString)
+        stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
+        stubDelete(s"/paye-registration/$regId/delete-rejected-incorp", 200, "")
+
+        val res = await(sessionProfile.withCurrentProfile(testFunc))
+        res.header.status mustBe SEE_OTHER
+
+        val crDeleteS4L = findAll(deleteRequestedFor(urlMatching(s"/save4later/paye-registration-frontend/$regId")))
+        val captor = crDeleteS4L.get(0)
+        captor.getUrl.contains(regId) mustBe true
+
+        val crDeletePAYEReg = findAll(deleteRequestedFor(urlMatching(s"/paye-registration/$regId/delete-rejected-incorp")))
+        val captor2 = crDeletePAYEReg.get(0)
+        captor2.getUrl.contains(regId) mustBe true
       }
     }
 

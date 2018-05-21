@@ -47,6 +47,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     override val employmentService        = mockEmploymentServiceV2
     implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     override val incorporationInformationConnector = mockIncorpInfoConnector
+    override val payeRegistrationService  = mockPayeRegService
   }
 
   val emptyView                       = EmployingStaffV2(None, None, None, None, None)

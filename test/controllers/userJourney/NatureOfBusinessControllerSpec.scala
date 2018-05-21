@@ -46,6 +46,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
       override val keystoreConnector = mockKeystoreConnector
       implicit val messagesApi: MessagesApi = mockMessagesApi
       override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
     }
   }
 

@@ -43,6 +43,7 @@ class PayeBaseControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val authConnector           = mockAuthConnector
       override val keystoreConnector       = mockKeystoreConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
     }
 
     def testOkFunction(msg: String): Future[Result] = Future.successful(Ok(msg))

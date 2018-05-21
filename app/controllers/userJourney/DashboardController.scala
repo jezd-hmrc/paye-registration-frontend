@@ -21,7 +21,7 @@ import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
-import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 
@@ -35,7 +35,8 @@ class DashboardControllerImpl @Inject()(val messagesApi: MessagesApi,
                                         val companyDetailsService: CompanyDetailsService,
                                         val incorpInfoService: IncorporationInformationService,
                                         servicesConfig: ServicesConfig,
-                                        val incorporationInformationConnector: IncorporationInformationConnector) extends DashboardController with AuthRedirectUrls {
+                                        val incorporationInformationConnector: IncorporationInformationConnector,
+                                        val payeRegistrationService: PAYERegistrationService) extends DashboardController with AuthRedirectUrls {
 
   override lazy val companyRegUrl = servicesConfig.getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
   override lazy val companyRegUri = servicesConfig.getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")

@@ -51,6 +51,7 @@ class EligibilityControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
       override def messagesApi = mockMessagesApi
       override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
     }
   }
 

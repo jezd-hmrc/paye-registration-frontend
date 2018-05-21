@@ -45,7 +45,8 @@ class PAYEContactControllerImpl @Inject()(val companyDetailsService: CompanyDeta
                                           val s4LService: S4LService,
                                           val incorpInfoService: IncorporationInformationService,
                                           val auditService: AuditService,
-                                          val incorporationInformationConnector: IncorporationInformationConnector) extends PAYEContactController with AuthRedirectUrls
+                                          val incorporationInformationConnector: IncorporationInformationConnector,
+                                          val payeRegistrationService: PAYERegistrationService) extends PAYEContactController with AuthRedirectUrls
 
 trait PAYEContactController extends PayeBaseController {
 

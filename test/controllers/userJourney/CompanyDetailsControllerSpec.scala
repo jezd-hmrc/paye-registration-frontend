@@ -52,6 +52,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val prepopService            = mockPrepopulationService
       override val auditService             = mockAuditService
       override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService  = mockPayeRegService
     }
   }
 

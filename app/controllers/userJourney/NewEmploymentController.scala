@@ -44,7 +44,8 @@ class NewEmploymentControllerImpl @Inject()(val employmentService: EmploymentSer
                                             val companyDetailsService: CompanyDetailsService,
                                             val incorpInfoService: IncorporationInformationService,
                                             implicit val messagesApi: MessagesApi,
-                                            val incorporationInformationConnector: IncorporationInformationConnector) extends NewEmploymentController with AuthRedirectUrls
+                                            val incorporationInformationConnector: IncorporationInformationConnector,
+                                            val payeRegistrationService: PAYERegistrationService) extends NewEmploymentController with AuthRedirectUrls
 
 
 trait NewEmploymentController extends PayeBaseController {

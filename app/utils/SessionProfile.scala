@@ -18,10 +18,12 @@ package utils
 
 import common.exceptions.InternalExceptions
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
-import enums.{CacheKeys, IncorporationStatus}
+import enums.{CacheKeys, IncorporationStatus, RegistrationDeletion}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import play.api.Logger
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{Call, Request, Result}
+import services.PAYERegistrationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
@@ -31,23 +33,35 @@ import scala.util.Try
 trait SessionProfile extends InternalExceptions {
   val keystoreConnector: KeystoreConnector
   val incorporationInformationConnector: IncorporationInformationConnector
+  val payeRegistrationService: PAYERegistrationService
 
   def withCurrentProfile(f: => CurrentProfile => Future[Result], checkSubmissionStatus: Boolean = true)(implicit request: Request[_],  hc: HeaderCarrier): Future[Result] = {
-    keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
-      case Some(currentProfile) =>
-        currentProfileChecks(currentProfile, checkSubmissionStatus)(f)
-      case None => keystoreConnector.fetchAndGetFromKeystore(CacheKeys.CurrentProfile.toString) flatMap {
-        _.fold(Future.successful(Redirect(controllers.userJourney.routes.PayeStartController.startPaye()))) { cp =>
+    def ifInflightUserChecksElseRedirectTo(urlCall: Call): Future[Result] = {
+      keystoreConnector.fetchAndGetFromKeystore(CacheKeys.CurrentProfile.toString) flatMap {
+        _.fold(Future.successful(Redirect(urlCall))) { cp =>
           incorporationInformationConnector.setupSubscription(cp.companyTaxRegistration.transactionId, cp.registrationID) flatMap { res =>
             if (res.contains(IncorporationStatus.rejected)) {
-              //TODO: add code cleanup registration
-              Future.successful(Redirect(controllers.userJourney.routes.SignInOutController.incorporationRejected()))
+              payeRegistrationService.handleIIResponse(cp.companyTaxRegistration.transactionId, res.get) map {
+                case RegistrationDeletion.success => Redirect(controllers.userJourney.routes.SignInOutController.incorporationRejected())
+                case _ =>
+                  Logger.warn(s"Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} incorporation is rejected but the cleanup failed probably due to the wrong status of the paye registration")
+                  Redirect(controllers.userJourney.routes.SignInOutController.postSignIn())
+              } recover {
+                case err =>
+                  Logger.error(s"Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} Incorporation is rejected but handleIIResponse threw an unexpected exception whilst trying to cleanup with message: ${err.getMessage}")
+                  Redirect(controllers.userJourney.routes.SignInOutController.incorporationRejected())
+              }
             } else {
               currentProfileChecks(cp, checkSubmissionStatus)(f)
             }
           }
         }
       }
+    }
+
+    keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
+      case Some(currentProfile) => currentProfileChecks(currentProfile, checkSubmissionStatus)(f)
+      case None                 => ifInflightUserChecksElseRedirectTo(controllers.userJourney.routes.PayeStartController.startPaye())
     }
   }
 
